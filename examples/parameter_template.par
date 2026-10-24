@@ -1,0 +1,47 @@
+# CAN test parameter file
+# Generated from the Variant and Signals sheets. Do not edit generated copies.
+
+[TC.CHANGE_VARCODE_XXXVARIANT_TEST_IDXXX]
+purpose = "Change vehicle variant to XXXVARIANT_CODEXXX"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "check_XCP", "check_XCP", "wait_1000", "stop_record_XCP", "wait_10000")
+UDS_request = ("2E FD DE XXXVARIANT_CODEXXX)
+UDS_response = ("6E FD DE")
+
+@base
+[TC.Monitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
+purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 XXXDTC_VALUEXXX xx", "59 02 XXXDTC_VALUEXXX xx")
+set_CAN_signal1 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
+set_CAN_signal2 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
+check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+
+@with_precondition
+[TC.Monitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
+purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "set_CAN_signal", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 XXXDTC_VALUEXXX xx", "59 02 XXXDTC_VALUEXXX xx")
+set_CAN_signal1 = (XXXPRECONDITIONSXXX)
+set_CAN_signal2 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
+check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+
+@base
+[TC.NoMonitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
+purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08")
+UDS_response = ("59 02")
+set_CAN_signal1 = ("XXXCAN_SIGNALXXX")
+check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+
+@with_precondition
+[TC.NoMonitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
+purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "set_CAN_signal", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08")
+UDS_response = ("59 02")
+set_CAN_signal1 = (XXXPRECONDITIONSXXX)
+set_CAN_signal2 = ("XXXCAN_SIGNALXXX")
+check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)

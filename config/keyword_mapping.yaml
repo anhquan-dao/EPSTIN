@@ -1,0 +1,183 @@
+# Placeholder contract for examples/parameter_template.par.
+# Excel column numbers are 1-based, matching the column shown in Excel.
+schema_version: 2
+
+# Every keyword navigator identifies its sheet, column, and first data row.
+# Header rows are deliberately not used by the generator.
+source_navigators:
+  Variant:
+    sheet_name: Variant
+    start_row: 4
+  Signals:
+    sheet_name: Signals
+    start_row: 4
+  Firmware_DTC:
+    sheet_name: Firmware_DTC
+    start_row: 4
+
+test_set:
+  variant_signal_matrix: cartesian_product
+  output_scope: single_parameter_file
+  outputs:
+    parameter_file: can_signal_test_parameters.par
+    test_list_file: can_signal_test_list.txt
+  invalid_values:
+    navigator:
+      sheet: Signals
+      column_number: 5
+      start_row: 4
+    delimiter: ","
+    trim_whitespace: true
+    empty_value_policy: error
+    output_format: '"{value}"'
+    output_joiner: ","
+  preconditions:
+    # Column 4 contains ordered CAN assignments, e.g.
+    # "PassengerAvailable,0;EngineRunning,1".
+    # The @ character is reserved for the variation marker in the template.
+    navigator:
+      sheet: Signals
+      column_number: 4
+      start_row: 4
+    assignment_delimiter: ";"
+    signal_value_delimiter: ","
+    trim_whitespace: true
+    empty_value_policy: error
+    output_format: '"{signal}"=>"{value}"'
+    output_joiner: ", "
+    template_variation_marker: "@"
+
+template_variations:
+  marker_prefix: "@"
+  without_precondition: base
+  with_precondition: with_precondition
+
+# This is the single source of truth for the NET decision and test-case type.
+# A Variant named in the Signals non-affected-variant cell must receive the
+# NoMonitoring test. Every other Variant receives the Monitoring test.
+net_logic:
+  function_test_outcome:
+    signal_function:
+      sheet: Signals
+      column_number: 8
+      start_row: 4
+    non_affected_variant:
+      sheet: Signals
+      column_number: 9
+      start_row: 4
+    variant_code:
+      sheet: Variant
+      column_number: 2
+      start_row: 4
+    outcomes:
+      non_affected_variant:
+        condition: variant_code_equals_non_affected_variant
+        test_case_type: NoMonitoring
+        function_state: enabled
+        available_function: "{signal_function}"
+        unavailable_function: N/A
+      affected_variant:
+        condition: otherwise
+        test_case_type: Monitoring
+        function_state: disabled
+        available_function: N/A
+        unavailable_function: "{signal_function}"
+    non_affected_variant_inference:
+      # Used only when the Signals Non-affected variant cell is blank. A
+      # non-affected Variant must declare every disabled function unavailable.
+      candidate_unavailable_functions:
+        sheet: Variant
+        column_number: 4
+        start_row: 4
+      list_delimiter: ","
+      match_policy: all_disabled_functions_must_be_unavailable
+      multiple_candidates: error
+      no_candidate: error
+    disabled_function_assignments:
+      list_delimiter: ","
+      values_in_order: ["0", "1"]
+      output_format: '"{function}"=>"{value}"'
+      output_joiner: ","
+
+template_keywords:
+  XXXVAR_IDXXX:
+    source_type: navigator
+    navigator:
+      sheet: Variant
+      column_number: 1
+      start_row: 4
+
+  XXXVARIANT_CODEXXX:
+    source_type: navigator
+    navigator:
+      sheet: Variant
+      column_number: 2
+      start_row: 4
+
+  XXXVARIANT_TEST_IDXXX:
+    source_type: variant_test_id
+    navigator:
+      sheet: Variant
+      column_number: 1
+      start_row: 4
+    replace_characters:
+      "-": "_"
+
+  XXXCAN_FRAMEXXX:
+    source_type: navigator
+    navigator:
+      sheet: Signals
+      column_number: 1
+      start_row: 4
+
+  XXXCAN_SIGNALXXX:
+    source_type: navigator
+    navigator:
+      sheet: Signals
+      column_number: 3
+      start_row: 4
+
+  XXXINVALID_VALUEXXX:
+    source_type: invalid_values
+
+  # Use this after the @ variation marker in the template. It resolves to one
+  # set_CAN_signal command per assignment in the Signals Preconditions cell.
+  XXXPRECONDITIONXXX:
+    source_type: precondition
+
+  XXXPRECONDITIONSXXX:
+    source_type: precondition
+
+  XXXDTC_VALUEXXX:
+    source_type: lookup
+    source_navigator:
+      sheet: Signals
+      column_number: 6
+      start_row: 4
+    lookup_navigator:
+      sheet: Firmware_DTC
+      column_number: 1
+      start_row: 4
+    return_column_number: 2
+
+  XXXAVAILABLE_FUNCTIONXXX:
+    source_type: net_logic
+    rule: function_test_outcome
+    output_field: available_function
+
+  XXXUNAVAILABLE_FUNCTIONXXX:
+    source_type: net_logic
+    rule: function_test_outcome
+    output_field: unavailable_function
+
+  # Use this placeholder without adding another => value in the template.
+  # Example output: "function1"=>"0","function2"=>"1".
+  XXXFUNCTIONS_WILL_BE_DISABLEDXXX:
+    source_type: net_logic
+    rule: function_test_outcome
+    output_field: disabled_function_assignments
+
+  XXXEXPECTED_DISABLE_FUNCTIONSXXX:
+    source_type: net_logic
+    rule: function_test_outcome
+    output_field: disabled_function_assignments

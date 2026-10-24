@@ -1,0 +1,4 @@
+scenario,variant_count,signal_count,invalid_value_count,disabled_function_count,test_cases,seconds
+Small,2,10,1,1,20,1.765
+Medium,10,50,2,2,500,1.715
+Large,20,100,3,2,2000,1.741

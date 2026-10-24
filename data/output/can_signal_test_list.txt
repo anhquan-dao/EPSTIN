@@ -1,0 +1,7 @@
+# Generated test list
+TC.CHANGE_VARCODE_VAR_001
+TC.Monitoring_DoorLockStatus.VAR_001
+TC.Monitoring_EngineRunning.VAR_001
+TC.CHANGE_VARCODE_VAR_002
+TC.Monitoring_DoorLockStatus.VAR_002
+TC.Monitoring_EngineRunning.VAR_002

@@ -2,3 +2,4 @@
 # Application dependencies will be added when implementation begins.
 pywin32>=308
 pyinstaller>=6.0
+PyYAML>=6.0

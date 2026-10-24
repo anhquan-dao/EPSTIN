@@ -1,0 +1,111 @@
+# Benchmark template: one selected Monitoring or NoMonitoring test per Variant × Signal.
+[TC.CHANGE_VARCODE_VAR_001]
+purpose = "Change vehicle variant to VARIANT_001"
+UDS_request = ("2E FD DE VARIANT_001")
+UDS_response = ("6E FD DE")
+
+[TC.NoMonitoring_Signal_001.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_001" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_002.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_002" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_003.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_003" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_004.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_004" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_005.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_005" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_006.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_006" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_007.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_007" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_008.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_008" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_009.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_009" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_010.VAR_001]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_010" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+# Benchmark template: one selected Monitoring or NoMonitoring test per Variant × Signal.
+[TC.CHANGE_VARCODE_VAR_002]
+purpose = "Change vehicle variant to VARIANT_002"
+UDS_request = ("2E FD DE VARIANT_002")
+UDS_response = ("6E FD DE")
+
+[TC.Monitoring_Signal_001.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_001" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_002.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_002" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_003.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_003" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_004.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_004" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_005.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_005" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_006.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_006" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_007.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_007" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_008.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_008" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.Monitoring_Signal_009.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_009" => "1")
+check_XCP_1 = ("Function_1"=>"0")
+
+[TC.NoMonitoring_Signal_010.VAR_002]
+set_preconditions = ("PreconditionSignal"=>"1")
+set_CAN_signal = ("Signal_010" => "1")
+check_XCP_1 = ("Function_1"=>"0")

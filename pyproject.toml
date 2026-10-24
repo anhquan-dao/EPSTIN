@@ -11,4 +11,5 @@ requires-python = ">=3.10"
 dependencies = [
     "pywin32>=308; platform_system == 'Windows'",
     "pyinstaller>=6.0",
+    "PyYAML>=6.0",
 ]
