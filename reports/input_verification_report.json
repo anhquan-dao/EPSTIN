@@ -1,0 +1,7 @@
+{
+  "excel": "examples\\can_signal_input_example.xlsx",
+  "signal_source": "examples\\verification_signals.dbc",
+  "function_source": "examples\\verification_functions.pm",
+  "valid": true,
+  "errors": []
+}

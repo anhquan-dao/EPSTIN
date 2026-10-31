@@ -39,7 +39,7 @@ The repository now includes a starter, Windows-only Excel-to-PAR generation pipe
 `examples/can_signal_input_example.xlsx` is a small, illustrative input contract. It has:
 
 - `Variant`: variant identifiers, codes, and available/unavailable functions.
-- `Signals`: CAN frame, signal, precondition, invalid-value, firmware, debounce, disablement, and non-affected-variant fields.
+- `Signals`: CAN frame, signal, precondition, invalid-value, firmware, debounce, disablement, non-affected-variant, and test-type fields.
 - `Firmware_DTC`: an FW-to-DTC mapping table.
 - `Instructions`: brief field definitions and conventions.
 
@@ -92,6 +92,20 @@ Run the benchmark scenarios, including the 2,000-test large scenario:
 
 It creates the Markdown and CSV reports plus an SVG bar chart in `reports/`.
 
+## Verify input catalogs
+
+Use selected DBC/Perl signal and A2L/Perl function sources to validate the Excel inputs:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\verify_excel_inputs.py --excel examples\can_signal_input_example.xlsx --signal-source examples\verification_signals.dbc --function-source examples\verification_functions.pm
+```
+
+Omit any of the three source-path options to open its native file picker. Run the automated verifier scenarios with:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests\test_verify_excel_inputs.py
+```
+
 ### Latest example results
 
 | Scenario | Variants | Signals | Invalid values | Disabled functions | Test cases | Build time |
@@ -102,7 +116,7 @@ It creates the Markdown and CSV reports plus an SVG bar chart in `reports/`.
 
 These measurements include Excel workbook reading and generation of the final parameter file and test list on the benchmark machine. Re-run the benchmark to measure the current environment.
 
-The mapping defines a Variant × Signals test set; separate invalid values in the `invalid values` cell with `,`. The `preconditions` cell is an ordered list of `signal,value` pairs separated by `;`, which resolves to `set_CAN_signal` commands through `XXXPRECONDITIONSXXX`. `net_logic.function_test_outcome` selects `NoMonitoring` when the Variant code equals the signal's non-affected Variant, and `Monitoring` otherwise.
+The mapping defines a Variant × Signals test set; separate invalid values in the `invalid values` cell with `,`. The `preconditions` cell is an ordered list of `signal,value` pairs separated by `;`. In a signal-test template, `"edit_<<<PRECONDITION_signal>>>_signal"` expands to one edit step per precondition and `set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)` expands to the matching set-command lines. The Signals `Test type` cell selects a named YAML mapping such as `Signal` → `@signal_test` or `Frame Timeout` → `@frame_TO`. `net_logic.function_test_outcome` selects `NoMonitoring` when the Variant code equals the signal's non-affected Variant, and `Monitoring` otherwise.
 
 ## Open design decisions
 

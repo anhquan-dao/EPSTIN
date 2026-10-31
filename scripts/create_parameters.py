@@ -15,7 +15,8 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from parameter_generator.excel_reader import read_workbook
 
-KEYWORD_PATTERN = re.compile(r"XXX[A-Z][A-Z0-9_]*XXX")
+KEYWORD_PATTERN = re.compile(r"XXX[A-Z][A-Z0-9_]*?XXX", re.IGNORECASE)
+PRECONDITION_PLACEHOLDER_PATTERN = re.compile(r"<<<PRECONDITION_(?:signal|value)>>>")
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,20 +87,46 @@ def resolve_net_logic(
     return outcome
 
 
-def render_preconditions(signal: dict[str, str], config: dict[str, object]) -> str:
+def parse_preconditions(signal: dict[str, str], config: dict[str, object]) -> list[dict[str, str]]:
+    """Parse the ordered setup-signal assignments for one signal test."""
     settings = config["test_set"]["preconditions"]
-    assignments = column_value(signal, int(settings["navigator"]["column_number"])).split(settings["assignment_delimiter"])
+    raw_value = column_value(signal, int(settings["navigator"]["column_number"])).strip()
+    if not raw_value:
+        if settings["empty_value_policy"] == "no_precondition":
+            return []
+        raise ValueError(f"Signals row {signal['__row_number__']} has no precondition value.")
+
+    assignments = raw_value.split(settings["assignment_delimiter"])
     if settings.get("trim_whitespace", False):
         assignments = [assignment.strip() for assignment in assignments]
     if settings["empty_value_policy"] == "error" and any(not assignment for assignment in assignments):
         raise ValueError(f"Signals row {signal['__row_number__']} contains an empty precondition assignment.")
-    rendered = []
+    parsed = []
     for assignment in assignments:
         parts = assignment.split(settings["signal_value_delimiter"], maxsplit=1)
         if len(parts) != 2 or not all(part.strip() for part in parts):
             raise ValueError(f"Signals row {signal['__row_number__']} has invalid precondition '{assignment}'.")
-        rendered.append(settings["output_format"].format(signal=parts[0].strip(), value=parts[1].strip()))
-    return settings["output_joiner"].join(rendered)
+        parsed.append({"signal": parts[0].strip(), "value": parts[1].strip()})
+    return parsed
+
+
+def expand_preconditions(template: str, preconditions: list[dict[str, str]], config: dict[str, object]) -> str:
+    """Expand the two <<<PRECONDITION_*>>> fragments in a signal-test block."""
+    expansions = config["test_set"]["preconditions"]["template_expansions"]
+    content = template
+    for expansion in expansions.values():
+        fragment = expansion["template_fragment"]
+        target = fragment if preconditions else expansion.get("empty_template_fragment", fragment)
+        if target not in content:
+            continue
+        replacement = expansion["output_joiner"].join(
+            expansion["output_format"].format(**precondition) for precondition in preconditions
+        )
+        content = content.replace(target, replacement)
+    unresolved = PRECONDITION_PLACEHOLDER_PATTERN.findall(content)
+    if unresolved:
+        raise ValueError(f"Unreplaced precondition placeholder(s): {', '.join(sorted(set(unresolved)))}")
+    return content
 
 
 def render_invalid_values(signal: dict[str, str], config: dict[str, object]) -> str:
@@ -110,6 +137,28 @@ def render_invalid_values(signal: dict[str, str], config: dict[str, object]) -> 
     if settings["empty_value_policy"] == "error" and any(not value for value in values):
         raise ValueError(f"Signals row {signal['__row_number__']} contains an empty invalid value.")
     return settings["output_joiner"].join(settings["output_format"].format(value=value) for value in values)
+
+
+def template_marker_for_test_type(variant: dict[str, str], signal: dict[str, str], config: dict[str, object]) -> str:
+    """Map a user-facing Excel Test type value to a template @marker."""
+    settings = config["test_type"]
+    input_value = resolve_navigator(settings["navigator"], variant, signal).strip()
+    mappings = settings["input_mappings"]
+    if input_value not in mappings:
+        allowed = ", ".join(mappings)
+        raise ValueError(
+            f"Signals row {signal['__row_number__']} has unsupported Test type '{input_value}'. "
+            f"Allowed values: {allowed}."
+        )
+    return mappings[input_value]["template_marker"]
+
+
+def apply_net_test_case_type(template: str, test_case_type: str) -> str:
+    """Reuse a type-specific template body for Monitoring or NoMonitoring."""
+    pattern = re.compile(r"(?m)^\[TC\.(?:Monitoring|NoMonitoring)_")
+    if not pattern.search(template):
+        raise ValueError("The selected template block must start with a Monitoring or NoMonitoring test-case name.")
+    return pattern.sub(f"[TC.{test_case_type}_", template, count=1)
 
 
 def variant_test_id(variant: dict[str, str], config: dict[str, object]) -> str:
@@ -128,7 +177,7 @@ def firmware_index(rows: list[dict[str, str]], lookup_column: int, return_column
 
 
 def keyword_values(
-    variant: dict[str, str], signal: dict[str, str], preconditions: str, invalid_values: str,
+    variant: dict[str, str], signal: dict[str, str], invalid_values: str,
     firmware_dtc: list[dict[str, str]], config: dict[str, object], variants: list[dict[str, str]],
 ) -> dict[str, str]:
     values: dict[str, str] = {}
@@ -142,8 +191,6 @@ def keyword_values(
             values[keyword] = variant_test_id(variant, config)
         elif source_type in {"invalid_value", "invalid_values"}:
             values[keyword] = invalid_values
-        elif source_type == "precondition":
-            values[keyword] = preconditions
         elif source_type == "lookup":
             if fw_index is None:
                 lookup = specification["lookup_navigator"]
@@ -162,19 +209,42 @@ def keyword_values(
 
 def split_template_variations(template: str, config: dict[str, object]) -> tuple[str, dict[str, list[str]]]:
     marker_prefix = re.escape(config["template_variations"]["marker_prefix"])
-    parts = re.split(rf"(?m)^{marker_prefix}([A-Za-z_]+)\s*$", template)
-    change_template = parts[0].rstrip() + "\n"
+    marker_pattern = re.compile(rf"^{marker_prefix}([A-Za-z_]+)\s*$")
+    change_lines: list[str] = []
     variations: dict[str, list[str]] = {}
-    for index in range(1, len(parts), 2):
-        variations.setdefault(parts[index], []).append(parts[index + 1].strip() + "\n")
-    return change_template, variations
+    active_markers: list[str] = []
+    active_lines: list[str] = []
+
+    def save_active_block() -> None:
+        if active_markers and active_lines:
+            key = ".".join(active_markers)
+            variations.setdefault(key, []).append("\n".join(active_lines).strip() + "\n")
+
+    for line in template.splitlines():
+        match = marker_pattern.fullmatch(line)
+        if match:
+            if active_lines:
+                save_active_block()
+                active_lines.clear()
+                active_markers[:] = [match.group(1)]
+            elif active_markers:
+                active_markers.append(match.group(1))
+            else:
+                active_markers.append(match.group(1))
+            continue
+        if active_markers:
+            active_lines.append(line)
+        else:
+            change_lines.append(line)
+    save_active_block()
+    return "\n".join(change_lines).rstrip() + "\n", variations
 
 
 def render(template: str, replacements: dict[str, str]) -> str:
     content = template
     for keyword, value in replacements.items():
-        content = content.replace(keyword, value)
-    remaining = KEYWORD_PATTERN.findall(content)
+        content = re.sub(re.escape(keyword), value, content, flags=re.IGNORECASE)
+    remaining = [keyword.upper() for keyword in KEYWORD_PATTERN.findall(content)]
     if remaining:
         raise ValueError(f"Unreplaced keyword(s): {', '.join(sorted(set(remaining)))}")
     return content
@@ -189,12 +259,15 @@ def main() -> int:
     args = parse_args()
     template = args.template.read_text(encoding="utf-8")
     config = yaml.safe_load(args.keyword_mapping.read_text(encoding="utf-8"))
-    start_rows = {settings["sheet_name"]: int(settings["start_row"]) for settings in config["source_navigators"].values()}
+    source_navigators = config["source_navigators"]
+    start_rows = {settings["sheet_name"]: int(settings["start_row"]) for settings in source_navigators.values()}
     workbook = read_workbook(args.workbook, start_rows)
-    variants, signals, firmware_dtc = workbook["Variant"], workbook["Signals"], workbook["Firmware_DTC"]
+    variants = workbook[source_navigators["Variant"]["sheet_name"]]
+    signals = workbook[source_navigators["Signals"]["sheet_name"]]
+    firmware_dtc = workbook[source_navigators["Firmware_DTC"]["sheet_name"]]
     if not variants or not signals or not firmware_dtc:
         raise ValueError("Variant, Signals, and Firmware_DTC must each contain at least one data row.")
-    unmapped = set(KEYWORD_PATTERN.findall(template)) - set(config["template_keywords"])
+    unmapped = {keyword.upper() for keyword in KEYWORD_PATTERN.findall(template)} - set(config["template_keywords"])
     if unmapped:
         raise ValueError(f"Template contains unmapped keyword(s): {', '.join(sorted(unmapped))}")
 
@@ -203,20 +276,22 @@ def main() -> int:
     parameter_sections: list[str] = []
     test_list: list[str] = ["# Generated test list"]
     for variant in variants:
-        change_replacements = keyword_values(variant, signals[0], "", "", firmware_dtc, config, variants)
+        change_replacements = keyword_values(variant, signals[0], "", firmware_dtc, config, variants)
         parameter_sections.append(render(change_template, change_replacements))
         test_list.append(f"TC.CHANGE_VARCODE_{variant_test_id(variant, config)}")
         for signal in signals:
-            preconditions = render_preconditions(signal, config)
+            preconditions = parse_preconditions(signal, config)
             invalid_values = render_invalid_values(signal, config)
-            replacements = keyword_values(variant, signal, preconditions, invalid_values, firmware_dtc, config, variants)
+            replacements = keyword_values(variant, signal, invalid_values, firmware_dtc, config, variants)
             outcome = resolve_net_logic(variant, signal, config, variants)
-            variation_name = config["template_variations"]["with_precondition"] if preconditions else config["template_variations"]["without_precondition"]
-            blocks = variation_blocks.get(variation_name, [])
-            matching = [block for block in blocks if f"[TC.{outcome['test_case_type']}_" in block]
-            if len(matching) != 1:
-                raise ValueError(f"Template needs exactly one {variation_name} block for {outcome['test_case_type']}.")
-            parameter_sections.append(render(matching[0], replacements))
+            template_marker = template_marker_for_test_type(variant, signal, config)
+            if outcome.get("template_marker_suffix"):
+                template_marker = f"{template_marker}.{outcome['template_marker_suffix']}"
+            blocks = variation_blocks.get(template_marker, [])
+            if len(blocks) != 1:
+                raise ValueError(f"Template needs exactly one @{template_marker} block for Signals row {signal['__row_number__']}.")
+            selected_block = apply_net_test_case_type(blocks[0], outcome["test_case_type"])
+            parameter_sections.append(render(expand_preconditions(selected_block, preconditions, config), replacements))
             test_list.append(test_id(outcome["test_case_type"], signal, variant, config))
 
     outputs = config["test_set"]["outputs"]

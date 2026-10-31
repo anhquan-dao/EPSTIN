@@ -6,13 +6,13 @@ schema_version: 2
 # Header rows are deliberately not used by the generator.
 source_navigators:
   Variant:
-    sheet_name: Variant
+    sheet_name: VSO_VAR
     start_row: 4
   Signals:
-    sheet_name: Signals
+    sheet_name: NET_RX
     start_row: 4
   Firmware_DTC:
-    sheet_name: Firmware_DTC
+    sheet_name: DDL
     start_row: 4
 
 test_set:
@@ -42,15 +42,47 @@ test_set:
     assignment_delimiter: ";"
     signal_value_delimiter: ","
     trim_whitespace: true
-    empty_value_policy: error
-    output_format: '"{signal}"=>"{value}"'
-    output_joiner: ", "
+    # An empty cell means that the signal test has no setup signals.
+    empty_value_policy: no_precondition
+    # The signal-test template expands these fragments once for every
+    # `signal,value` assignment. For example, `Foo,1;Bar,0` becomes:
+    # - "edit_Foo_signal", "edit_Bar_signal" in test_steps
+    # - set_Foo_signal = (1) / set_Bar_signal = (0) as parameter lines
+    template_expansions:
+      signal_steps:
+        template_fragment: '"edit_<<<PRECONDITION_signal>>>_signal"'
+        empty_template_fragment: '"edit_<<<PRECONDITION_signal>>>_signal",'
+        output_format: '"edit_{signal}_signal"'
+        output_joiner: ", "
+      set_commands:
+        template_fragment: 'set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)'
+        empty_template_fragment: 'set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)'
+        output_format: 'set_{signal}_signal = ({value})'
+        output_joiner: "\n"
     template_variation_marker: "@"
 
 template_variations:
   marker_prefix: "@"
-  without_precondition: base
-  with_precondition: with_precondition
+
+# The Excel Test type cell selects the matching @<template_marker> block in
+# parameter_template.par. Input values are deliberately human-readable;
+# only the YAML needs to know the corresponding template marker.
+test_type:
+  navigator:
+    sheet: Signals
+    column_number: 11
+    start_row: 4
+  input_mappings:
+    Frame Timeout:
+      template_marker: frame_TO
+    Frame DLC:
+      template_marker: frame_DLC
+    Frame DRC:
+      template_marker: frame_DRC
+    Frame CTR:
+      template_marker: frame_CTR
+    Signal:
+      template_marker: signal_test
 
 # This is the single source of truth for the NET decision and test-case type.
 # A Variant named in the Signals non-affected-variant cell must receive the
@@ -73,6 +105,9 @@ net_logic:
       non_affected_variant:
         condition: variant_code_equals_non_affected_variant
         test_case_type: NoMonitoring
+        # Appended to the Excel-selected test-type marker, e.g.
+        # Signal -> @signal_test + @nofault.
+        template_marker_suffix: nofault
         function_state: enabled
         available_function: "{signal_function}"
         unavailable_function: N/A
@@ -139,14 +174,6 @@ template_keywords:
 
   XXXINVALID_VALUEXXX:
     source_type: invalid_values
-
-  # Use this after the @ variation marker in the template. It resolves to one
-  # set_CAN_signal command per assignment in the Signals Preconditions cell.
-  XXXPRECONDITIONXXX:
-    source_type: precondition
-
-  XXXPRECONDITIONSXXX:
-    source_type: precondition
 
   XXXDTC_VALUEXXX:
     source_type: lookup

@@ -21,3 +21,5 @@ data/output/*.par
 # Keep project directories under version control
 !data/input/.gitkeep
 !data/output/.gitkeep
+
+node_modules/

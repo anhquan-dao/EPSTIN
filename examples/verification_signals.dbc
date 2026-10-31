@@ -1,0 +1,7 @@
+VERSION "Example CAN catalog"
+
+BO_ 256 BCM_Status: 8 BCM
+ SG_ DoorLockStatus : 0|2@1+ (1,0) [0|3] "" BCM
+
+BO_ 512 Powertrain_Status: 8 Powertrain
+ SG_ EngineRunning : 16|1@0+ (1,0) [0|1] "" Powertrain

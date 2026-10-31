@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-KEYWORD_PATTERN = re.compile(r"XXX[A-Z][A-Z0-9_]*XXX")
+KEYWORD_PATTERN = re.compile(r"XXX[A-Z][A-Z0-9_]*?XXX", re.IGNORECASE)
 
 
 def parse_args() -> argparse.Namespace:
@@ -23,7 +23,7 @@ def main() -> int:
     args = parse_args()
     template = args.template.read_text(encoding="utf-8")
     mapping = yaml.safe_load(args.mapping.read_text(encoding="utf-8"))["template_keywords"]
-    found = sorted(set(KEYWORD_PATTERN.findall(template)))
+    found = sorted({keyword.upper() for keyword in KEYWORD_PATTERN.findall(template)})
     unknown = sorted(set(found) - set(mapping))
 
     print("Detected keywords:")

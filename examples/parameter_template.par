@@ -1,47 +1,116 @@
 # CAN test parameter file
 # Generated from the Variant and Signals sheets. Do not edit generated copies.
 
-[TC.CHANGE_VARCODE_XXXVARIANT_TEST_IDXXX]
-purpose = "Change vehicle variant to XXXVARIANT_CODEXXX"
+[TC.CHANGE_VARCODE_xxxVARIANT_TEST_IDxxx]
+purpose = "Change vehicle variant to xxxVARIANT_CODExxx"
 test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "check_XCP", "check_XCP", "wait_1000", "stop_record_XCP", "wait_10000")
-UDS_request = ("2E FD DE XXXVARIANT_CODEXXX)
+UDS_request = ("2E FD DE xxxVARIANT_CODExxx)
 UDS_response = ("6E FD DE")
 
-@base
-[TC.Monitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
-purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
-test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+@frame_TO
+[TC.Monitoring_xxxCAN_FRAMExxx]
+purpose = "Verify NET logic of CAN frame xxxCAN_FRAMExxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","disable_xxxCAN_FRAMExxx_frame", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
 UDS_request = ("19 02 08", "19 02 08")
-UDS_response = ("59 02 XXXDTC_VALUEXXX xx", "59 02 XXXDTC_VALUEXXX xx")
-set_CAN_signal1 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
-set_CAN_signal2 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
-check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx")
 
-@with_precondition
-[TC.Monitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
-purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
-test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "set_CAN_signal", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_signal", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+@frame_TO
+@nofault
+[TC.NoMonitoring_xxxCAN_FRAMExxx]
+purpose = "Verify NET logic of CAN frame xxxCAN_FRAMExxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","disable_xxxCAN_FRAMExxx_frame", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
 UDS_request = ("19 02 08", "19 02 08")
-UDS_response = ("59 02 XXXDTC_VALUEXXX xx", "59 02 XXXDTC_VALUEXXX xx")
-set_CAN_signal1 = (XXXPRECONDITIONSXXX)
-set_CAN_signal2 = ("XXXCAN_SIGNALXXX" => XXXINVALID_VALUEXXX)
-check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx")
 
-@base
-[TC.NoMonitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
-purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
-test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "stop_record_XCP", "stop_car", "wait_10000")
-UDS_request = ("19 02 08")
-UDS_response = ("59 02")
-set_CAN_signal1 = ("XXXCAN_SIGNALXXX")
-check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+@frame_DLC
+[TC.Monitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx")
 
-@with_precondition
-[TC.NoMonitoring_XXXCAN_SIGNALXXX.XXXVARIANT_TEST_IDXXX]
-purpose = "Verify NET logic of CAN signal XXXCAN_FRAMEXXX::XXXCAN_SIGNALXXX"
-test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "set_CAN_signal", "drive_to_50kph", "wait_10000", "set_CAN_signal", "wait_1000", "send_UDS", "stop_record_XCP", "stop_car", "wait_10000")
-UDS_request = ("19 02 08")
-UDS_response = ("59 02")
-set_CAN_signal1 = (XXXPRECONDITIONSXXX)
-set_CAN_signal2 = ("XXXCAN_SIGNALXXX")
-check_XCP_1 = (XXXEXPECTED_DISABLE_FUNCTIONSXXX)
+@frame_DLC
+@nofault
+[TC.NoMonitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx") 
+
+@frame_DRC
+[TC.Monitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx") 
+
+@frame_DRC
+@nofault
+[TC.NoMonitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx") 
+
+
+@frame_CTR
+[TC.Monitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx") 
+
+@frame_CTR
+@nofault
+[TC.NoMonitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx") 
+
+@signal_test
+[TC.Monitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_xxxCAN_SIGNALxxx_signal = (xxxINVALID_VALUExxx)
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx")
+
+@signal_test
+@nofault
+[TC.NoMonitoring_xxxCAN_FRAMExxx_xxxCAN_SIGNALxxx]
+purpose = "Verify NET logic of CAN signal xxxCAN_FRAMExxx::xxxCAN_SIGNALxxx"
+test_steps = ("KL30_ON", "KL15_ON", "record_XCP", "send_UDS", "drive_to_50kph", "wait_10000", "edit_<<<PRECONDITION_signal>>>_signal","edit_xxxCAN_SIGNALxxx_signal", "wait_1000", "send_UDS", "check_XCP", "reset_CAN_manipulation", "wait_1000", "send_UDS", "check_XCP", "wait_1000", "stop_record_XCP", "stop_car", "wait_10000")
+UDS_request = ("19 02 08", "19 02 08")
+UDS_response = ("59 02 xxxDTC_VALUExxx xx", "59 02 xxxDTC_VALUExxx xx")
+set_xxxCAN_SIGNALxxx_signal = (xxxINVALID_VALUExxx)
+set_<<<PRECONDITION_signal>>>_signal = (<<<PRECONDITION_value>>>)
+check_XCP_1 = (xxxEXPECTED_DISABLE_FUNCTIONSxxx)
+check_Delta_time = %("signal1"=>"xxxDEBOUNCE_INDxxx","value1"=>"1","signal2"=>"xxxFAIL_INDxxx","value2"=>"1","deltaTime"=>"xxxDEBOUNCE_TIMExxx")
